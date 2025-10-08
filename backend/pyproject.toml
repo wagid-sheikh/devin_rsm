@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "tsv-rsm-backend"
+version = "0.1.0"
+description = "TSV-RSM Backend - Multi-tenant Retail Store Management System"
+authors = ["TSV Team"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.118.2"
+uvicorn = {extras = ["standard"], version = "^0.37.0"}
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.43"}
+asyncpg = "^0.30.0"
+alembic = "^1.16.5"
+pydantic-settings = "^2.11.0"
+python-dotenv = "^1.1.1"
+python-jose = {extras = ["cryptography"], version = "^3.5.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.20"
+redis = "^6.4.0"
+httpx = "^0.28.1"
+aiofiles = "^24.1.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.2"
+pytest-asyncio = "^1.2.0"
+pytest-cov = "^7.0.0"
+mypy = "^1.18.2"
+ruff = "^0.14.0"
+types-passlib = "^1.7.7.20250602"
+types-python-jose = "^3.5.0.20250531"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
