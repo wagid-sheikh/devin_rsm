@@ -69,3 +69,50 @@ frontend/
 - Multi-tenant support
 - Real-time updates
 - Offline support (planned)
+
+## SDK Generation
+
+This project uses automated TypeScript SDK generation from the FastAPI OpenAPI specification.
+
+### Generate SDK Manually
+
+To regenerate the SDK after backend API changes:
+
+```bash
+npm run generate:sdk
+```
+
+This will:
+1. Export the OpenAPI spec from the backend (`backend/openapi.json`)
+2. Generate TypeScript types and client in `src/lib/sdk/`
+
+### Automated SDK Updates
+
+The SDK is automatically regenerated via GitHub Actions when backend code changes are pushed to main. The workflow:
+- Triggers on changes to `backend/app/**/*.py` or `backend/pyproject.toml`
+- Exports the latest OpenAPI specification
+- Regenerates the TypeScript SDK
+- Creates a pull request with the updated SDK
+
+### Using the SDK
+
+The generated SDK is wrapped in `src/lib/apiClient.ts` for easier usage:
+
+```typescript
+import { ApiClient } from '@/lib/apiClient';
+
+// Authentication
+const response = await ApiClient.auth.login({ email, password });
+const user = await ApiClient.auth.getMe();
+
+// Companies
+const companies = await ApiClient.companies.listCompanies();
+
+// Stores
+const stores = await ApiClient.stores.listStores();
+```
+
+The SDK provides:
+- Full TypeScript types for all API requests and responses
+- Automatic authentication token handling
+- Type-safe error handling with `ApiError`

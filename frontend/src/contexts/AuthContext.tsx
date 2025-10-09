@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { authApi } from '@/lib/api';
-import type { UserResponse, LoginRequest } from '@/types/auth';
+import { ApiClient } from '@/lib/apiClient';
+import type { UserResponse, LoginRequest } from '@/lib/sdk';
 
 interface AuthContextType {
   user: UserResponse | null;
@@ -27,11 +27,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const token = localStorage.getItem(TOKEN_KEY);
       if (token) {
         try {
-          const userData = await authApi.getMe(token);
+          ApiClient.setAccessToken(token);
+          const userData = await ApiClient.auth.getMe();
           setUser(userData);
         } catch (error) {
           localStorage.removeItem(TOKEN_KEY);
           localStorage.removeItem(REFRESH_TOKEN_KEY);
+          ApiClient.setAccessToken(null);
         }
       }
       setIsLoading(false);
@@ -41,11 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (credentials: LoginRequest) => {
-    const response = await authApi.login(credentials);
+    const response = await ApiClient.auth.login(credentials);
     localStorage.setItem(TOKEN_KEY, response.access_token);
     localStorage.setItem(REFRESH_TOKEN_KEY, response.refresh_token);
+    ApiClient.setAccessToken(response.access_token);
     
-    const userData = await authApi.getMe(response.access_token);
+    const userData = await ApiClient.auth.getMe();
     setUser(userData);
   };
 
@@ -53,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     if (refreshToken) {
       try {
-        await authApi.logout({ refresh_token: refreshToken });
+        await ApiClient.auth.logout({ refresh_token: refreshToken });
       } catch (error) {
         console.error('Logout error:', error);
       }
@@ -61,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+    ApiClient.setAccessToken(null);
     setUser(null);
   };
 
@@ -70,10 +74,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('No refresh token available');
     }
 
-    const response = await authApi.refresh({ refresh_token: refreshTokenValue });
+    const response = await ApiClient.auth.refresh({ refresh_token: refreshTokenValue });
     localStorage.setItem(TOKEN_KEY, response.access_token);
+    ApiClient.setAccessToken(response.access_token);
     
-    const userData = await authApi.getMe(response.access_token);
+    const userData = await ApiClient.auth.getMe();
     setUser(userData);
   };
 

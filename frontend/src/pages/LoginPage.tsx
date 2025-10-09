@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { ApiError } from '@/lib/api';
+import { ApiError } from '@/lib/sdk';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
