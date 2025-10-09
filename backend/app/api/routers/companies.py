@@ -20,7 +20,10 @@ async def create_company(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))],
 ) -> CompanyResponse:
-    company = Company(**company_data.model_dump())
+    company_dict = company_data.model_dump()
+    company_dict["contacts"] = company_dict["contacts"]
+    company_dict["address"] = company_dict["address"]
+    company = Company(**company_dict)
     db.add(company)
     await db.commit()
     await db.refresh(company)
