@@ -10,6 +10,8 @@ from app.core.security import decode_token, is_token_revoked
 from app.db.session import get_db
 from app.models.user import User
 
+__all__ = ["get_current_user", "get_db", "get_accessible_company_ids"]
+
 security = HTTPBearer()
 
 
@@ -57,3 +59,26 @@ async def get_current_user(
         )
 
     return user
+
+
+async def get_accessible_company_ids(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> set[uuid.UUID]:
+    from app.models.store import Store
+    from app.models.user_store_access import UserStoreAccess
+
+    result = await db.execute(
+        select(UserStoreAccess.store_id).where(UserStoreAccess.user_id == current_user.id)
+    )
+    store_ids = [row[0] for row in result.fetchall()]
+
+    if not store_ids:
+        return set()
+
+    result = await db.execute(
+        select(Store.company_id).where(Store.id.in_(store_ids))
+    )
+    company_ids = {row[0] for row in result.fetchall()}
+
+    return company_ids
