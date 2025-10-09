@@ -10,6 +10,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.company import Company
+    from app.models.store import Store
 
 
 class CompanyGSTIN(Base):
@@ -31,3 +32,4 @@ class CompanyGSTIN(Base):
     )
 
     company: Mapped[Company] = relationship("Company", back_populates="gstins")
+    stores: Mapped[list[Store]] = relationship("Store", back_populates="company_gstin")
