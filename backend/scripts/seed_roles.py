@@ -1,6 +1,5 @@
 """Seed default roles for the RBAC system"""
 import asyncio
-import uuid
 
 from sqlalchemy import select
 
@@ -108,7 +107,6 @@ async def seed_roles() -> None:
 
             if not existing_role:
                 role = Role(
-                    id=uuid.uuid4(),
                     code=role_data["code"],
                     name=role_data["name"],
                     description=role_data["description"],

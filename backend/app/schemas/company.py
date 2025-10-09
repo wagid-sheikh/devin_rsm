@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -36,19 +35,35 @@ class CompanyAddress(BaseModel):
     landmark: str | None = Field(None, max_length=200)
 
 
+class CompanyGSTINResponse(BaseModel):
+    id: int
+    gstin: str
+    is_primary: bool
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CompanyGSTINCreate(BaseModel):
+    gstin: str = Field(..., pattern=r"^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$")
+    is_primary: bool = False
+
+
 class CompanyCreate(BaseModel):
     legal_name: str
     trade_name: str | None = None
-    gstin: str | None = None
     pan: str | None = None
     contacts: CompanyContacts
     address: CompanyAddress
+    gstins: list[CompanyGSTINCreate] = []
 
 
 class CompanyUpdate(BaseModel):
     legal_name: str | None = None
     trade_name: str | None = None
-    gstin: str | None = None
     pan: str | None = None
     contacts: CompanyContacts | None = None
     address: CompanyAddress | None = None
@@ -56,14 +71,14 @@ class CompanyUpdate(BaseModel):
 
 
 class CompanyResponse(BaseModel):
-    id: uuid.UUID
+    id: int
     legal_name: str
     trade_name: str | None
-    gstin: str | None
     pan: str | None
     contacts: CompanyContacts
     address: CompanyAddress
     status: str
+    gstins: list[CompanyGSTINResponse]
     created_at: datetime
     updated_at: datetime
 

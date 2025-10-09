@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 from typing import Any
 
@@ -6,7 +5,7 @@ from pydantic import BaseModel, EmailStr
 
 
 class RoleResponse(BaseModel):
-    id: uuid.UUID
+    id: int
     code: str
     name: str
     description: str | None
@@ -17,7 +16,7 @@ class RoleResponse(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: uuid.UUID
+    id: int
     email: EmailStr
     phone: str | None
     first_name: str

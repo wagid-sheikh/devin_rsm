@@ -1,4 +1,3 @@
-import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -45,10 +44,18 @@ async def get_current_user(
             detail="Could not validate credentials",
         )
 
+    try:
+        user_int_id = int(user_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user ID format",
+        ) from exc
+
     result = await db.execute(
         select(User)
         .options(selectinload(User.roles).selectinload(UserRole.role))
-        .where(User.id == uuid.UUID(user_id))
+        .where(User.id == user_int_id)
     )
     user = result.scalar_one_or_none()
 
@@ -70,7 +77,7 @@ async def get_current_user(
 async def get_accessible_company_ids(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> set[uuid.UUID]:
+) -> set[int]:
     from app.models.store import Store
     from app.models.user_store_access import UserStoreAccess
 

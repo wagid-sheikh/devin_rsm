@@ -1,13 +1,14 @@
-import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.api.deps import get_db
 from app.core.rbac import require_role
 from app.models.company import Company
+from app.models.company_gstin import CompanyGSTIN
 from app.models.user import User
 from app.schemas.company import CompanyCreate, CompanyResponse, CompanyUpdate
 
@@ -20,13 +21,20 @@ async def create_company(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))],
 ) -> CompanyResponse:
-    company_dict = company_data.model_dump()
-    company_dict["contacts"] = company_dict["contacts"]
-    company_dict["address"] = company_dict["address"]
+    company_dict = company_data.model_dump(exclude={"gstins"})
     company = Company(**company_dict)
     db.add(company)
+    await db.flush()
+
+    for gstin_data in company_data.gstins:
+        gstin = CompanyGSTIN(
+            company_id=company.id,
+            **gstin_data.model_dump()
+        )
+        db.add(gstin)
+
     await db.commit()
-    await db.refresh(company)
+    await db.refresh(company, ["gstins"])
     return CompanyResponse.model_validate(company)
 
 
@@ -35,18 +43,26 @@ async def list_companies(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))],
 ) -> list[CompanyResponse]:
-    result = await db.execute(select(Company).where(Company.status == "active"))
+    result = await db.execute(
+        select(Company)
+        .where(Company.status == "active")
+        .options(selectinload(Company.gstins))
+    )
     companies = result.scalars().all()
     return [CompanyResponse.model_validate(company) for company in companies]
 
 
 @router.get("/{company_id}", response_model=CompanyResponse)
 async def get_company(
-    company_id: uuid.UUID,
+    company_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))],
 ) -> CompanyResponse:
-    result = await db.execute(select(Company).where(Company.id == company_id))
+    result = await db.execute(
+        select(Company)
+        .where(Company.id == company_id)
+        .options(selectinload(Company.gstins))
+    )
     company = result.scalar_one_or_none()
 
     if not company:
@@ -60,12 +76,16 @@ async def get_company(
 
 @router.patch("/{company_id}", response_model=CompanyResponse)
 async def update_company(
-    company_id: uuid.UUID,
+    company_id: int,
     company_data: CompanyUpdate,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))],
 ) -> CompanyResponse:
-    result = await db.execute(select(Company).where(Company.id == company_id))
+    result = await db.execute(
+        select(Company)
+        .where(Company.id == company_id)
+        .options(selectinload(Company.gstins))
+    )
     company = result.scalar_one_or_none()
 
     if not company:
@@ -79,13 +99,13 @@ async def update_company(
         setattr(company, field, value)
 
     await db.commit()
-    await db.refresh(company)
+    await db.refresh(company, ["gstins"])
     return CompanyResponse.model_validate(company)
 
 
 @router.delete("/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_company(
-    company_id: uuid.UUID,
+    company_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_role("PLATFORM_ADMIN"))],
 ) -> None:
