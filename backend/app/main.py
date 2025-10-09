@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.routers import auth
+from app.api.routers import auth, companies, stores
 from app.core.config import settings
 from app.core.logging import get_logger, setup_logging
 from app.db.session import AsyncSessionLocal
@@ -37,6 +37,8 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix=settings.API_V1_STR)
+app.include_router(companies.router, prefix=settings.API_V1_STR)
+app.include_router(stores.router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health")

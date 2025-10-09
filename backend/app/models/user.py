@@ -12,6 +12,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.user_role import UserRole
+    from app.models.user_store_access import UserStoreAccess
 
 
 class User(Base):
@@ -35,3 +36,4 @@ class User(Base):
     )
 
     roles: Mapped[list[UserRole]] = relationship("UserRole", back_populates="user")
+    store_accesses: Mapped[list[UserStoreAccess]] = relationship("UserStoreAccess", back_populates="user")
