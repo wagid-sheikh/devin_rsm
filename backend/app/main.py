@@ -2,11 +2,21 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 
 from app.api.routers import auth, companies, stores
 from app.core.config import settings
+from app.core.exceptions import (
+    BusinessLogicError,
+    business_logic_error_handler,
+    generic_exception_handler,
+    integrity_error_handler,
+    validation_error_handler,
+)
 from app.core.logging import get_logger, setup_logging
 from app.db.session import AsyncSessionLocal
 
@@ -27,6 +37,12 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     lifespan=lifespan,
 )
+
+app.add_exception_handler(IntegrityError, integrity_error_handler)  # type: ignore[arg-type]
+app.add_exception_handler(RequestValidationError, validation_error_handler)  # type: ignore[arg-type]
+app.add_exception_handler(ValidationError, validation_error_handler)  # type: ignore[arg-type]
+app.add_exception_handler(BusinessLogicError, business_logic_error_handler)  # type: ignore[arg-type]
+app.add_exception_handler(Exception, generic_exception_handler)
 
 app.add_middleware(
     CORSMiddleware,
