@@ -17,6 +17,7 @@ from app.core.security import (
 )
 from app.db.session import get_db
 from app.models.user import User
+from app.models.user_role import UserRole
 from app.schemas.auth import (
     LoginRequest,
     LogoutRequest,
@@ -140,7 +141,7 @@ async def get_current_user_info(
     result = await db.execute(
         select(User)
         .where(User.id == current_user.id)
-        .options(selectinload(User.roles).selectinload(User.roles[0].role))
+        .options(selectinload(User.roles).selectinload(UserRole.role))
     )
     user_with_roles = result.scalar_one()
 
