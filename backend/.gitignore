@@ -35,3 +35,6 @@ Thumbs.db
 
 # Alembic
 alembic/versions/*.pyc
+
+# Other files to ignore
+create_test_user.py
