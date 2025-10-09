@@ -1,0 +1,9 @@
+# Generated SDK - do not lint
+src/lib/sdk/
+
+# Build output
+dist/
+build/
+
+# Dependencies
+node_modules/
