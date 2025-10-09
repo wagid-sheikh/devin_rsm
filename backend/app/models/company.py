@@ -24,8 +24,8 @@ class Company(Base):
     trade_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     gstin: Mapped[str | None] = mapped_column(String(15), unique=True, index=True, nullable=True)
     pan: Mapped[str | None] = mapped_column(String(10), unique=True, index=True, nullable=True)
-    contacts: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
-    address: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    contacts: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    address: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="active")
 
     created_at: Mapped[datetime] = mapped_column(
