@@ -1,11 +1,10 @@
-import uuid
 from datetime import datetime
 
 from pydantic import BaseModel
 
 
 class StoreCreate(BaseModel):
-    company_id: uuid.UUID
+    company_id: int
     name: str
     address: str
     is_franchise: bool = False
@@ -23,8 +22,8 @@ class StoreUpdate(BaseModel):
 
 
 class StoreResponse(BaseModel):
-    id: uuid.UUID
-    company_id: uuid.UUID
+    id: int
+    company_id: int
     name: str
     address: str
     is_franchise: bool

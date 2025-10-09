@@ -1,4 +1,3 @@
-import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -36,7 +35,7 @@ async def list_stores(
             require_role("PLATFORM_ADMIN", "COMPANY_ADMIN", "AREA_MANAGER", "STORE_MANAGER")
         ),
     ],
-    accessible_company_ids: Annotated[set[uuid.UUID], Depends(get_accessible_company_ids)],
+    accessible_company_ids: Annotated[set[int], Depends(get_accessible_company_ids)],
 ) -> list[StoreResponse]:
     query = select(Store).where(Store.status == "active")
 
@@ -53,7 +52,7 @@ async def list_stores(
 
 @router.get("/{store_id}", response_model=StoreResponse)
 async def get_store(
-    store_id: uuid.UUID,
+    store_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[
         User,
@@ -61,7 +60,7 @@ async def get_store(
             require_role("PLATFORM_ADMIN", "COMPANY_ADMIN", "AREA_MANAGER", "STORE_MANAGER")
         ),
     ],
-    accessible_company_ids: Annotated[set[uuid.UUID], Depends(get_accessible_company_ids)],
+    accessible_company_ids: Annotated[set[int], Depends(get_accessible_company_ids)],
 ) -> StoreResponse:
     result = await db.execute(select(Store).where(Store.id == store_id))
     store = result.scalar_one_or_none()
@@ -84,11 +83,11 @@ async def get_store(
 
 @router.patch("/{store_id}", response_model=StoreResponse)
 async def update_store(
-    store_id: uuid.UUID,
+    store_id: int,
     store_data: StoreUpdate,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))],
-    accessible_company_ids: Annotated[set[uuid.UUID], Depends(get_accessible_company_ids)],
+    accessible_company_ids: Annotated[set[int], Depends(get_accessible_company_ids)],
 ) -> StoreResponse:
     result = await db.execute(select(Store).where(Store.id == store_id))
     store = result.scalar_one_or_none()
@@ -117,10 +116,10 @@ async def update_store(
 
 @router.delete("/{store_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_store(
-    store_id: uuid.UUID,
+    store_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))],
-    accessible_company_ids: Annotated[set[uuid.UUID], Depends(get_accessible_company_ids)],
+    accessible_company_ids: Annotated[set[int], Depends(get_accessible_company_ids)],
 ) -> None:
     result = await db.execute(select(Store).where(Store.id == store_id))
     store = result.scalar_one_or_none()
