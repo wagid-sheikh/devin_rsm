@@ -5,10 +5,12 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.security import decode_token, is_token_revoked
 from app.db.session import get_db
 from app.models.user import User
+from app.models.user_role import UserRole
 
 __all__ = ["get_current_user", "get_db", "get_accessible_company_ids"]
 
@@ -43,7 +45,11 @@ async def get_current_user(
             detail="Could not validate credentials",
         )
 
-    result = await db.execute(select(User).where(User.id == uuid.UUID(user_id)))
+    result = await db.execute(
+        select(User)
+        .options(selectinload(User.roles).selectinload(UserRole.role))
+        .where(User.id == uuid.UUID(user_id))
+    )
     user = result.scalar_one_or_none()
 
     if user is None:
