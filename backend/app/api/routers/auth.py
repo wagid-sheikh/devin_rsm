@@ -145,4 +145,16 @@ async def get_current_user_info(
     )
     user_with_roles = result.scalar_one()
 
-    return UserResponse.model_validate(user_with_roles)
+    user_dict = {
+        "id": user_with_roles.id,
+        "email": user_with_roles.email,
+        "phone": user_with_roles.phone,
+        "first_name": user_with_roles.first_name,
+        "last_name": user_with_roles.last_name,
+        "status": user_with_roles.status,
+        "roles": [user_role.role for user_role in user_with_roles.roles],
+        "created_at": user_with_roles.created_at,
+        "updated_at": user_with_roles.updated_at,
+    }
+
+    return UserResponse.model_validate(user_dict)
