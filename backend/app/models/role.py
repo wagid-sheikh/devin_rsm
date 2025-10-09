@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import String, func
+from sqlalchemy import JSON, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -14,17 +14,16 @@ if TYPE_CHECKING:
     from app.models.user_role import UserRole
 
 
-class User(Base):
-    __tablename__ = "users"
+class Role(Base):
+    __tablename__ = "roles"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    code: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    permissions: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="active")
 
     created_at: Mapped[datetime] = mapped_column(
@@ -34,4 +33,4 @@ class User(Base):
         nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
-    roles: Mapped[list[UserRole]] = relationship("UserRole", back_populates="user")
+    users: Mapped[list[UserRole]] = relationship("UserRole", back_populates="role")

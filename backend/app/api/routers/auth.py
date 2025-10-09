@@ -4,7 +4,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
+from app.api.deps import get_current_user
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -23,6 +25,7 @@ from app.schemas.auth import (
     RefreshResponse,
     TokenResponse,
 )
+from app.schemas.user import UserResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -127,3 +130,18 @@ async def logout(request: LogoutRequest) -> MessageResponse:
             pass
 
     return MessageResponse(message="Successfully logged out")
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_info(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> UserResponse:
+    result = await db.execute(
+        select(User)
+        .where(User.id == current_user.id)
+        .options(selectinload(User.roles).selectinload(User.roles[0].role))
+    )
+    user_with_roles = result.scalar_one()
+
+    return UserResponse.model_validate(user_with_roles)

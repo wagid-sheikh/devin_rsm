@@ -8,6 +8,7 @@ from app.schemas.auth import (
     RefreshResponse,
     TokenResponse,
 )
+from app.schemas.user import RoleResponse, UserResponse
 
 __all__ = [
     "LoginRequest",
@@ -15,5 +16,7 @@ __all__ = [
     "MessageResponse",
     "RefreshRequest",
     "RefreshResponse",
+    "RoleResponse",
     "TokenResponse",
+    "UserResponse",
 ]
