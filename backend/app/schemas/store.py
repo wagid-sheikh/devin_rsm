@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class StoreCreate(BaseModel):
     company_id: int
+    company_gstin_id: int | None = None
     name: str
     address: str
     is_franchise: bool = False
@@ -13,6 +14,7 @@ class StoreCreate(BaseModel):
 
 
 class StoreUpdate(BaseModel):
+    company_gstin_id: int | None = None
     name: str | None = None
     address: str | None = None
     is_franchise: bool | None = None
@@ -24,6 +26,7 @@ class StoreUpdate(BaseModel):
 class StoreResponse(BaseModel):
     id: int
     company_id: int
+    company_gstin_id: int | None
     name: str
     address: str
     is_franchise: bool

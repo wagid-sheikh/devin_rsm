@@ -10,6 +10,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.company import Company
+    from app.models.company_gstin import CompanyGSTIN
     from app.models.user_store_access import UserStoreAccess
 
 
@@ -19,6 +20,9 @@ class Store(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     company_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    company_gstin_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("company_gstins.id", ondelete="SET NULL"), nullable=True, index=True
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     address: Mapped[str] = mapped_column(String(500), nullable=False)
@@ -35,4 +39,5 @@ class Store(Base):
     )
 
     company: Mapped[Company] = relationship("Company", back_populates="stores")
+    company_gstin: Mapped[CompanyGSTIN | None] = relationship("CompanyGSTIN", back_populates="stores")
     user_accesses: Mapped[list[UserStoreAccess]] = relationship("UserStoreAccess", back_populates="store")
