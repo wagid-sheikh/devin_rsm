@@ -20,7 +20,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <img src="/logo.png" alt="TSV-RSM" className="h-8 w-auto" />
+              <img src="/logo.png" alt="TSV-RSM" className="h-8 w-auto invert dark:invert-0" />
               <span className="ml-4 text-xl font-semibold text-gray-900 dark:text-white">
                 TSV-RSM
               </span>
