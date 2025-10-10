@@ -23,7 +23,7 @@ class UserStoreAccess(Base):
     store_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("stores.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    scope: Mapped[str] = mapped_column(String(50), nullable=False, default="full")
+    scope: Mapped[str] = mapped_column(String(50), nullable=False, default="view")
 
     created_at: Mapped[datetime] = mapped_column(
         nullable=False, server_default=func.now()

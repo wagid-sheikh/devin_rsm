@@ -5,6 +5,9 @@
 import type { UserCreate } from '../models/UserCreate';
 import type { UserResponse } from '../models/UserResponse';
 import type { UserRoleAssignment } from '../models/UserRoleAssignment';
+import type { UserStoreAccessCreate } from '../models/UserStoreAccessCreate';
+import type { UserStoreAccessResponse } from '../models/UserStoreAccessResponse';
+import type { UserStoreAccessUpdate } from '../models/UserStoreAccessUpdate';
 import type { UserUpdate } from '../models/UserUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -163,6 +166,100 @@ export class UsersService {
             path: {
                 'user_id': userId,
                 'role_id': roleId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * List User Stores
+     * @param userId
+     * @returns UserStoreAccessResponse Successful Response
+     * @throws ApiError
+     */
+    public static listUserStoresApiV1UsersUserIdStoresGet(
+        userId: number,
+    ): CancelablePromise<Array<UserStoreAccessResponse>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/users/{user_id}/stores',
+            path: {
+                'user_id': userId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Assign Store To User
+     * @param userId
+     * @param requestBody
+     * @returns UserStoreAccessResponse Successful Response
+     * @throws ApiError
+     */
+    public static assignStoreToUserApiV1UsersUserIdStoresPost(
+        userId: number,
+        requestBody: UserStoreAccessCreate,
+    ): CancelablePromise<UserStoreAccessResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/users/{user_id}/stores',
+            path: {
+                'user_id': userId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Update User Store Access
+     * @param userId
+     * @param storeId
+     * @param requestBody
+     * @returns UserStoreAccessResponse Successful Response
+     * @throws ApiError
+     */
+    public static updateUserStoreAccessApiV1UsersUserIdStoresStoreIdPatch(
+        userId: number,
+        storeId: number,
+        requestBody: UserStoreAccessUpdate,
+    ): CancelablePromise<UserStoreAccessResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/users/{user_id}/stores/{store_id}',
+            path: {
+                'user_id': userId,
+                'store_id': storeId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Remove Store Access
+     * @param userId
+     * @param storeId
+     * @returns void
+     * @throws ApiError
+     */
+    public static removeStoreAccessApiV1UsersUserIdStoresStoreIdDelete(
+        userId: number,
+        storeId: number,
+    ): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/users/{user_id}/stores/{store_id}',
+            path: {
+                'user_id': userId,
+                'store_id': storeId,
             },
             errors: {
                 422: `Validation Error`,

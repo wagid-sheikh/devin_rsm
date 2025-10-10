@@ -26,6 +26,7 @@ export type { MessageResponse } from './models/MessageResponse';
 export type { RefreshRequest } from './models/RefreshRequest';
 export type { RefreshResponse } from './models/RefreshResponse';
 export type { RoleResponse } from './models/RoleResponse';
+export type { StoreAccessInfo } from './models/StoreAccessInfo';
 export type { StoreCreate } from './models/StoreCreate';
 export type { StoreResponse } from './models/StoreResponse';
 export type { StoreUpdate } from './models/StoreUpdate';
@@ -33,6 +34,9 @@ export type { TokenResponse } from './models/TokenResponse';
 export type { UserCreate } from './models/UserCreate';
 export type { UserResponse } from './models/UserResponse';
 export type { UserRoleAssignment } from './models/UserRoleAssignment';
+export { UserStoreAccessCreate } from './models/UserStoreAccessCreate';
+export type { UserStoreAccessResponse } from './models/UserStoreAccessResponse';
+export { UserStoreAccessUpdate } from './models/UserStoreAccessUpdate';
 export type { UserUpdate } from './models/UserUpdate';
 export type { ValidationError } from './models/ValidationError';
 

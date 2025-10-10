@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { StoreSelector } from './StoreSelector';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -43,6 +44,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             
             <div className="flex items-center space-x-4">
+              <StoreSelector />
+              
               <div className="text-sm text-gray-700 dark:text-gray-300">
                 {user?.first_name} {user?.last_name}
               </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { UsersService, type UserResponse, type UserCreate, type UserUpdate } from '@/lib/sdk';
+import { UsersService, StoresService, type UserResponse, type UserCreate, type UserUpdate, type StoreResponse, UserStoreAccessCreate } from '@/lib/sdk';
 import { ApiError } from '@/lib/sdk';
 
 export function UsersPage() {
@@ -9,6 +9,7 @@ export function UsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingUser, setEditingUser] = useState<UserResponse | null>(null);
+  const [managingStoresUser, setManagingStoresUser] = useState<UserResponse | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
 
@@ -116,6 +117,9 @@ export function UsersPage() {
                       Roles
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Stores
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -138,6 +142,9 @@ export function UsersPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                         {user.roles.map((role) => role.name).join(', ') || '-'}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        {user.store_accesses?.length || 0} store(s)
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -157,6 +164,12 @@ export function UsersPage() {
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           Edit
+                        </button>
+                        <button
+                          onClick={() => setManagingStoresUser(user)}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          Stores
                         </button>
                         <button
                           onClick={() => handleToggleStatus(user.id, user.status)}
@@ -194,6 +207,17 @@ export function UsersPage() {
             onClose={() => setEditingUser(null)}
             onSuccess={() => {
               setEditingUser(null);
+              loadUsers();
+            }}
+          />
+        )}
+
+        {managingStoresUser && (
+          <ManageStoresModal
+            user={managingStoresUser}
+            onClose={() => setManagingStoresUser(null)}
+            onSuccess={() => {
+              setManagingStoresUser(null);
               loadUsers();
             }}
           />
@@ -548,6 +572,165 @@ function EditUserModal({
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+function ManageStoresModal({
+  user,
+  onClose,
+  onSuccess,
+}: {
+  user: UserResponse;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [availableStores, setAvailableStores] = useState<StoreResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadStores();
+  }, []);
+
+  const loadStores = async () => {
+    try {
+      setLoading(true);
+      const stores = await StoresService.listStoresApiV1StoresGet();
+      setAvailableStores(stores);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Failed to load stores');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAssignStore = async (storeId: number, scope: UserStoreAccessCreate.scope) => {
+    try {
+      await UsersService.assignStoreToUserApiV1UsersUserIdStoresPost(user.id, {
+        store_id: storeId,
+        scope: scope,
+      });
+      onSuccess();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Failed to assign store');
+      }
+    }
+  };
+
+  const handleRemoveStore = async (storeId: number) => {
+    try {
+      await UsersService.removeStoreAccessApiV1UsersUserIdStoresStoreIdDelete(user.id, storeId);
+      onSuccess();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Failed to remove store access');
+      }
+    }
+  };
+
+  const userStoreIds = new Set(user.store_accesses?.map(sa => sa.store_id) || []);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+          Manage Store Access - {user.first_name} {user.last_name}
+        </h2>
+
+        {error && (
+          <div className="mb-4 rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+            <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Current Store Access
+            </h3>
+            {user.store_accesses && user.store_accesses.length > 0 ? (
+              <div className="space-y-2">
+                {user.store_accesses.map((sa) => (
+                  <div key={sa.store_id} className="flex items-center justify-between p-2 border border-gray-200 dark:border-gray-700 rounded">
+                    <div>
+                      <span className="font-medium text-gray-900 dark:text-white">{sa.store.name}</span>
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({sa.scope})</span>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveStore(sa.store_id)}
+                      className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400">No stores assigned</p>
+            )}
+          </div>
+
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Assign New Store
+            </h3>
+            {loading ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400">Loading stores...</p>
+            ) : (
+              <div className="space-y-2">
+                {availableStores
+                  .filter(store => !userStoreIds.has(store.id))
+                  .map((store) => (
+                    <div key={store.id} className="flex items-center justify-between p-2 border border-gray-200 dark:border-gray-700 rounded">
+                      <span className="font-medium text-gray-900 dark:text-white">{store.name}</span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleAssignStore(store.id, UserStoreAccessCreate.scope.VIEW)}
+                          className="px-2 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded hover:bg-blue-200 dark:hover:bg-blue-800"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleAssignStore(store.id, UserStoreAccessCreate.scope.EDIT)}
+                          className="px-2 py-1 text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded hover:bg-green-200 dark:hover:bg-green-800"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleAssignStore(store.id, UserStoreAccessCreate.scope.APPROVE)}
+                          className="px-2 py-1 text-xs bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded hover:bg-purple-200 dark:hover:bg-purple-800"
+                        >
+                          Approve
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                {availableStores.filter(store => !userStoreIds.has(store.id)).length === 0 && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">All stores already assigned</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );

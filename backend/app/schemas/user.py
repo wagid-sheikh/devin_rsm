@@ -3,6 +3,8 @@ from typing import Any
 
 from pydantic import BaseModel, EmailStr, Field
 
+from app.schemas.user_store_access import UserStoreAccessResponse
+
 
 class RoleResponse(BaseModel):
     id: int
@@ -23,6 +25,7 @@ class UserResponse(BaseModel):
     last_name: str
     status: str
     roles: list[RoleResponse]
+    store_accesses: list[UserStoreAccessResponse]
     created_at: datetime
     updated_at: datetime
 
