@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routers import auth, companies, cost_centers, stores, users
+from app.api.routers import auth, companies, cost_centers, customers, stores, users
 from app.core.config import settings
 from app.core.exceptions import (
     BusinessLogicError,
@@ -55,6 +55,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(companies.router, prefix=settings.API_V1_STR)
 app.include_router(cost_centers.router, prefix=settings.API_V1_STR)
+app.include_router(customers.router, prefix=settings.API_V1_STR)
 app.include_router(stores.router, prefix=settings.API_V1_STR)
 app.include_router(users.router, prefix=settings.API_V1_STR)
 
