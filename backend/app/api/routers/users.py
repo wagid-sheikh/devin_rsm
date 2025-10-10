@@ -11,11 +11,17 @@ from app.core.security import get_password_hash
 from app.models.role import Role
 from app.models.user import User
 from app.models.user_role import UserRole
+from app.models.user_store_access import UserStoreAccess
 from app.schemas.user import (
     UserCreate,
     UserResponse,
     UserRoleAssignment,
     UserUpdate,
+)
+from app.schemas.user_store_access import (
+    UserStoreAccessCreate,
+    UserStoreAccessResponse,
+    UserStoreAccessUpdate,
 )
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -50,7 +56,10 @@ async def create_user(
     result = await db.execute(
         select(User)
         .where(User.id == user.id)
-        .options(selectinload(User.roles).selectinload(UserRole.role))
+        .options(
+            selectinload(User.roles).selectinload(UserRole.role),
+            selectinload(User.store_accesses).selectinload(UserStoreAccess.store),
+        )
     )
     user_with_roles = result.scalar_one()
 
@@ -62,6 +71,7 @@ async def create_user(
         "last_name": user_with_roles.last_name,
         "status": user_with_roles.status,
         "roles": [user_role.role for user_role in user_with_roles.roles],
+        "store_accesses": user_with_roles.store_accesses,
         "created_at": user_with_roles.created_at,
         "updated_at": user_with_roles.updated_at,
     }
@@ -80,7 +90,10 @@ async def list_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
 ) -> list[UserResponse]:
-    query = select(User).options(selectinload(User.roles).selectinload(UserRole.role))
+    query = select(User).options(
+        selectinload(User.roles).selectinload(UserRole.role),
+        selectinload(User.store_accesses).selectinload(UserStoreAccess.store),
+    )
 
     if search:
         search_pattern = f"%{search}%"
@@ -110,6 +123,7 @@ async def list_users(
                 "last_name": user.last_name,
                 "status": user.status,
                 "roles": [user_role.role for user_role in user.roles],
+                "store_accesses": user.store_accesses,
                 "created_at": user.created_at,
                 "updated_at": user.updated_at,
             }
@@ -129,7 +143,10 @@ async def get_user(
     result = await db.execute(
         select(User)
         .where(User.id == user_id)
-        .options(selectinload(User.roles).selectinload(UserRole.role))
+        .options(
+            selectinload(User.roles).selectinload(UserRole.role),
+            selectinload(User.store_accesses).selectinload(UserStoreAccess.store),
+        )
     )
     user = result.scalar_one_or_none()
 
@@ -147,6 +164,7 @@ async def get_user(
         "last_name": user.last_name,
         "status": user.status,
         "roles": [user_role.role for user_role in user.roles],
+        "store_accesses": user.store_accesses,
         "created_at": user.created_at,
         "updated_at": user.updated_at,
     }
@@ -164,7 +182,10 @@ async def update_user(
     result = await db.execute(
         select(User)
         .where(User.id == user_id)
-        .options(selectinload(User.roles).selectinload(UserRole.role))
+        .options(
+            selectinload(User.roles).selectinload(UserRole.role),
+            selectinload(User.store_accesses).selectinload(UserStoreAccess.store),
+        )
     )
     user = result.scalar_one_or_none()
 
@@ -198,7 +219,10 @@ async def update_user(
     result = await db.execute(
         select(User)
         .where(User.id == user_id)
-        .options(selectinload(User.roles).selectinload(UserRole.role))
+        .options(
+            selectinload(User.roles).selectinload(UserRole.role),
+            selectinload(User.store_accesses).selectinload(UserStoreAccess.store),
+        )
     )
     updated_user = result.scalar_one()
 
@@ -210,6 +234,7 @@ async def update_user(
         "last_name": updated_user.last_name,
         "status": updated_user.status,
         "roles": [user_role.role for user_role in updated_user.roles],
+        "store_accesses": updated_user.store_accesses,
         "created_at": updated_user.created_at,
         "updated_at": updated_user.updated_at,
     }
@@ -288,7 +313,10 @@ async def assign_role_to_user(
     result = await db.execute(
         select(User)
         .where(User.id == user_id)
-        .options(selectinload(User.roles).selectinload(UserRole.role))
+        .options(
+            selectinload(User.roles).selectinload(UserRole.role),
+            selectinload(User.store_accesses).selectinload(UserStoreAccess.store),
+        )
     )
     updated_user = result.scalar_one()
 
@@ -300,6 +328,7 @@ async def assign_role_to_user(
         "last_name": updated_user.last_name,
         "status": updated_user.status,
         "roles": [user_role.role for user_role in updated_user.roles],
+        "store_accesses": updated_user.store_accesses,
         "created_at": updated_user.created_at,
         "updated_at": updated_user.updated_at,
     }
@@ -329,4 +358,150 @@ async def remove_role_from_user(
         )
 
     await db.delete(user_role)
+    await db.commit()
+
+
+@router.get("/{user_id}/stores", response_model=list[UserStoreAccessResponse])
+async def list_user_stores(
+    user_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[
+        User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))
+    ],
+) -> list[UserStoreAccessResponse]:
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    result = await db.execute(
+        select(UserStoreAccess)
+        .options(selectinload(UserStoreAccess.store))
+        .where(UserStoreAccess.user_id == user_id)
+    )
+    store_accesses = result.scalars().all()
+
+    return [UserStoreAccessResponse.model_validate(sa) for sa in store_accesses]
+
+
+@router.post(
+    "/{user_id}/stores",
+    response_model=UserStoreAccessResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def assign_store_to_user(
+    user_id: int,
+    store_access_data: UserStoreAccessCreate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[
+        User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))
+    ],
+) -> UserStoreAccessResponse:
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    from app.models.store import Store
+
+    result = await db.execute(
+        select(Store).where(Store.id == store_access_data.store_id)
+    )
+    store = result.scalar_one_or_none()
+
+    if not store:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Store not found",
+        )
+
+    result = await db.execute(
+        select(UserStoreAccess).where(
+            UserStoreAccess.user_id == user_id,
+            UserStoreAccess.store_id == store_access_data.store_id,
+        )
+    )
+    existing = result.scalar_one_or_none()
+
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User already has access to this store",
+        )
+
+    store_access = UserStoreAccess(
+        user_id=user_id,
+        store_id=store_access_data.store_id,
+        scope=store_access_data.scope,
+    )
+    db.add(store_access)
+    await db.commit()
+    await db.refresh(store_access, ["store"])
+
+    return UserStoreAccessResponse.model_validate(store_access)
+
+
+@router.patch("/{user_id}/stores/{store_id}", response_model=UserStoreAccessResponse)
+async def update_user_store_access(
+    user_id: int,
+    store_id: int,
+    update_data: UserStoreAccessUpdate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[
+        User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))
+    ],
+) -> UserStoreAccessResponse:
+    result = await db.execute(
+        select(UserStoreAccess).where(
+            UserStoreAccess.user_id == user_id,
+            UserStoreAccess.store_id == store_id,
+        )
+    )
+    store_access = result.scalar_one_or_none()
+
+    if not store_access:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Store access not found for this user",
+        )
+
+    store_access.scope = update_data.scope
+    await db.commit()
+    await db.refresh(store_access, ["store"])
+
+    return UserStoreAccessResponse.model_validate(store_access)
+
+
+@router.delete("/{user_id}/stores/{store_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_store_access(
+    user_id: int,
+    store_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[
+        User, Depends(require_role("PLATFORM_ADMIN", "COMPANY_ADMIN"))
+    ],
+) -> None:
+    result = await db.execute(
+        select(UserStoreAccess).where(
+            UserStoreAccess.user_id == user_id,
+            UserStoreAccess.store_id == store_id,
+        )
+    )
+    store_access = result.scalar_one_or_none()
+
+    if not store_access:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Store access not found for this user",
+        )
+
+    await db.delete(store_access)
     await db.commit()
