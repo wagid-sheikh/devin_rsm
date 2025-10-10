@@ -19,11 +19,27 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <nav className="bg-white dark:bg-gray-800 shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <img src="/logo.png" alt="TSV-RSM" className="h-8 w-auto invert dark:invert-0" />
-              <span className="ml-4 text-xl font-semibold text-gray-900 dark:text-white">
-                TSV-RSM
-              </span>
+            <div className="flex items-center space-x-8">
+              <div className="flex items-center">
+                <img src="/logo.png" alt="TSV-RSM" className="h-8 w-auto invert dark:invert-0" />
+                <span className="ml-4 text-xl font-semibold text-gray-900 dark:text-white">
+                  TSV-RSM
+                </span>
+              </div>
+              <nav className="flex space-x-4">
+                <a
+                  href="/dashboard"
+                  className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Dashboard
+                </a>
+                <a
+                  href="/cost-centers"
+                  className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Cost Centers
+                </a>
+              </nav>
             </div>
             
             <div className="flex items-center space-x-4">

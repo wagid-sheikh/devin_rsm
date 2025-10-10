@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import './styles/index.css'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { CostCentersPage } from './pages/CostCentersPage'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -32,6 +33,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 element={
                   <ProtectedRoute>
                     <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/cost-centers"
+                element={
+                  <ProtectedRoute>
+                    <CostCentersPage />
                   </ProtectedRoute>
                 }
               />
