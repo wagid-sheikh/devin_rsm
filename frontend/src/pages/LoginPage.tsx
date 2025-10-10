@@ -47,7 +47,7 @@ export function LoginPage() {
           <img
             src="/logo.png"
             alt="TSV-RSM Logo"
-            className="mx-auto h-16 w-auto"
+            className="mx-auto h-16 w-auto invert dark:invert-0"
           />
           <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
             Sign in to your account

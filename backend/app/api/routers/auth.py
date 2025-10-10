@@ -134,7 +134,12 @@ async def logout(request: LogoutRequest) -> MessageResponse:
             jti = payload.get("jti")
             exp = payload.get("exp")
             if jti and exp:
-                revoke_token(jti, exp)
+                try:
+                    revoke_token(jti, exp)
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"Failed to revoke token in Redis: {e}")
         except ValueError:
             pass
 

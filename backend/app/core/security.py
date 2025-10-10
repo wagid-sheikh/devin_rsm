@@ -62,13 +62,19 @@ def get_redis_client() -> Redis:
 
 
 def revoke_token(jti: str, exp: int) -> None:
-    redis_client = get_redis_client()
-    ttl = exp - int(datetime.now(UTC).timestamp())
-    if ttl > 0:
-        redis_client.setex(f"revoked_token:{jti}", ttl, "1")
+    try:
+        redis_client = get_redis_client()
+        ttl = exp - int(datetime.now(UTC).timestamp())
+        if ttl > 0:
+            redis_client.setex(f"revoked_token:{jti}", ttl, "1")
+    except Exception:
+        pass
 
 
 def is_token_revoked(jti: str) -> bool:
-    redis_client = get_redis_client()
-    result = cast(int, redis_client.exists(f"revoked_token:{jti}"))
-    return result > 0
+    try:
+        redis_client = get_redis_client()
+        result = cast(int, redis_client.exists(f"revoked_token:{jti}"))
+        return result > 0
+    except Exception:
+        return False
