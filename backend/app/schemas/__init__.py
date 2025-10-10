@@ -15,6 +15,11 @@ from app.schemas.cost_center import (
     CostCenterResponse,
     CostCenterUpdate,
 )
+from app.schemas.customer import (
+    CustomerCreate,
+    CustomerResponse,
+    CustomerUpdate,
+)
 from app.schemas.user import RoleResponse, UserResponse
 from app.schemas.user_store_access import (
     UserStoreAccessCreate,
@@ -28,6 +33,9 @@ __all__ = [
     "CostCenterCreate",
     "CostCenterResponse",
     "CostCenterUpdate",
+    "CustomerCreate",
+    "CustomerResponse",
+    "CustomerUpdate",
     "LoginRequest",
     "LogoutRequest",
     "MessageResponse",

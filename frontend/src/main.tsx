@@ -8,6 +8,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { StoreProvider } from './contexts/StoreContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { CostCentersPage } from './pages/CostCentersPage'
+import { CustomersPage } from './pages/CustomersPage'
 import { UsersPage } from './pages/UsersPage'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -44,6 +45,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   element={
                     <ProtectedRoute>
                       <CostCentersPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/customers"
+                  element={
+                    <ProtectedRoute>
+                      <CustomersPage />
                     </ProtectedRoute>
                   }
                 />

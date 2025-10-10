@@ -11,6 +11,7 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.company_cost_center import CompanyCostCenter
     from app.models.company_gstin import CompanyGSTIN
+    from app.models.customer import Customer
     from app.models.store import Store
 
 
@@ -35,3 +36,4 @@ class Company(Base):
     stores: Mapped[list[Store]] = relationship("Store", back_populates="company")
     gstins: Mapped[list[CompanyGSTIN]] = relationship("CompanyGSTIN", back_populates="company")
     cost_centers: Mapped[list[CompanyCostCenter]] = relationship("CompanyCostCenter", back_populates="company")
+    customers: Mapped[list[Customer]] = relationship("Customer", back_populates="company")

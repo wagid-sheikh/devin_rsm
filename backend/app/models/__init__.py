@@ -4,6 +4,9 @@ from app.models.company import Company
 from app.models.company_cost_center import CompanyCostCenter
 from app.models.company_gstin import CompanyGSTIN
 from app.models.cost_center import CostCenter
+from app.models.customer import Customer
+from app.models.customer_address import CustomerAddress
+from app.models.customer_contact import CustomerContact
 from app.models.role import Role
 from app.models.store import Store
 from app.models.user import User
@@ -15,6 +18,9 @@ __all__ = [
     "CompanyCostCenter",
     "CompanyGSTIN",
     "CostCenter",
+    "Customer",
+    "CustomerAddress",
+    "CustomerContact",
     "Role",
     "Store",
     "User",
