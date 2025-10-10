@@ -1,6 +1,9 @@
 """Export OpenAPI specification from FastAPI app."""
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.main import app
 

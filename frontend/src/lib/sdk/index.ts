@@ -30,7 +30,10 @@ export type { StoreCreate } from './models/StoreCreate';
 export type { StoreResponse } from './models/StoreResponse';
 export type { StoreUpdate } from './models/StoreUpdate';
 export type { TokenResponse } from './models/TokenResponse';
+export type { UserCreate } from './models/UserCreate';
 export type { UserResponse } from './models/UserResponse';
+export type { UserRoleAssignment } from './models/UserRoleAssignment';
+export type { UserUpdate } from './models/UserUpdate';
 export type { ValidationError } from './models/ValidationError';
 
 export { AuthService } from './services/AuthService';
@@ -38,3 +41,4 @@ export { CompaniesService } from './services/CompaniesService';
 export { CostCentersService } from './services/CostCentersService';
 export { DefaultService } from './services/DefaultService';
 export { StoresService } from './services/StoresService';
+export { UsersService } from './services/UsersService';
