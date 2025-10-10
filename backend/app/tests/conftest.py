@@ -1,4 +1,5 @@
 import asyncio
+import os
 import sys
 from collections.abc import AsyncGenerator, Generator
 from pathlib import Path
@@ -7,6 +8,9 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/test_db"
+os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only"
 
 
 @pytest.fixture(scope="session")
