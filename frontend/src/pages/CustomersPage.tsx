@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { CustomersService, type CustomerResponse, type CustomerCreate, type CustomerUpdate } from '@/lib/sdk';
 import { ApiError } from '@/lib/sdk';
 
 export function CustomersPage() {
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState<CustomerResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -164,8 +166,14 @@ export function CustomersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <button
-                        onClick={() => setEditingCustomer(customer)}
+                        onClick={() => navigate(`/customers/${customer.id}`)}
                         className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={() => setEditingCustomer(customer)}
+                        className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
                       >
                         Edit
                       </button>

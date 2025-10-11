@@ -24,6 +24,38 @@ class CustomerUpdate(BaseModel):
     status: str | None = None
 
 
+class CustomerContactCreate(BaseModel):
+    contact_person: str = Field(..., min_length=1, max_length=255)
+    phone: str = Field(
+        ..., pattern=r"^\+?[1-9]\d{1,14}$", description="Phone number in E.164 format"
+    )
+    email: EmailStr | None = None
+    is_primary: bool = False
+
+
+class CustomerContactUpdate(BaseModel):
+    contact_person: str | None = Field(None, min_length=1, max_length=255)
+    phone: str | None = Field(
+        None, pattern=r"^\+?[1-9]\d{1,14}$", description="Phone number in E.164 format"
+    )
+    email: EmailStr | None = None
+    is_primary: bool | None = None
+
+
+class CustomerAddressCreate(BaseModel):
+    type: str = Field(..., min_length=1, max_length=50, description="Address type (e.g., home, office)")
+    address: str = Field(..., min_length=1, description="Full address text")
+    is_pickup_default: bool = False
+    is_delivery_default: bool = False
+
+
+class CustomerAddressUpdate(BaseModel):
+    type: str | None = Field(None, min_length=1, max_length=50)
+    address: str | None = Field(None, min_length=1)
+    is_pickup_default: bool | None = None
+    is_delivery_default: bool | None = None
+
+
 class CustomerContactResponse(BaseModel):
     id: int
     customer_id: int
