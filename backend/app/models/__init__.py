@@ -7,7 +7,9 @@ from app.models.cost_center import CostCenter
 from app.models.customer import Customer
 from app.models.customer_address import CustomerAddress
 from app.models.customer_contact import CustomerContact
+from app.models.item import Item
 from app.models.role import Role
+from app.models.service_type import ServiceType
 from app.models.store import Store
 from app.models.user import User
 from app.models.user_role import UserRole
@@ -21,7 +23,9 @@ __all__ = [
     "Customer",
     "CustomerAddress",
     "CustomerContact",
+    "Item",
     "Role",
+    "ServiceType",
     "Store",
     "User",
     "UserRole",
