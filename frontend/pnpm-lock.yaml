@@ -20,6 +20,9 @@ importers:
       axios:
         specifier: ^1.12.2
         version: 1.12.2
+      form-data:
+        specifier: ^4.0.4
+        version: 4.0.4
       react:
         specifier: ^18.2.0
         version: 18.3.1
