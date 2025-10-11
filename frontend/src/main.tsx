@@ -10,6 +10,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { CostCentersPage } from './pages/CostCentersPage'
 import { CustomersPage } from './pages/CustomersPage'
 import { CustomerDetailPage } from './pages/CustomerDetailPage'
+import ItemsPage from './pages/ItemsPage'
 import { UsersPage } from './pages/UsersPage'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -62,6 +63,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   element={
                     <ProtectedRoute>
                       <CustomerDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/items"
+                  element={
+                    <ProtectedRoute>
+                      <ItemsPage />
                     </ProtectedRoute>
                   }
                 />
